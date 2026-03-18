@@ -76,12 +76,8 @@ export const userService = {
         // console.log("harshpassword :",hashpassword);
         
         if(hashpassword){
-            const sendVerificationResult = await SendEmailVerifaction(
-                {email : userExist.data?.email! , username: userExist.data?.name!}
-            )
-
-            // const token = await JwtToken.generateToken({userId: userExist.data!._id!})
-            // return new ApiResponce(sendVerificationResult.statusCode ,sendVerificationResult.message,null)
+            const token = await JwtToken.generateToken({userId: userExist.data!._id!})
+            return new ApiResponce(200 , "Login successful" , token)
         }
         return new ApiError(400 , "Incurrect password")
     },
@@ -93,7 +89,13 @@ export const userService = {
         if(userExist.statusCode != 200){
             return new ApiError(userExist.statusCode , userExist.message)
         }
-        if(userExist.data?.emailOTP == userOTP){
+        // console.log("save otp :",typeof( userExist.data?.emailOTP));
+        // console.log("send otp :",typeof( userOTP));
+        
+        if(userExist.data?.emailOTP === userOTP){
+            const responce = await userRepo.updateUser({ filter: {email : email} , update: {emailOTP : null}})
+            // console.log("responce :",responce);
+            
             return new ApiResponce(200 , "OTP verified successfully" , null)
         }else{
             return new ApiError(400 , "Invalid OTP")

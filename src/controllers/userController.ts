@@ -72,7 +72,10 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
 export const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
     try {
         const { email, otp } = req.body;
-        const resp = await userService.verifyEmailOTP(email , otp)
+        const userOtp = parseInt(otp);        
+        // console.log("controller otp : ",typeof(userOtp));
+
+        const resp = await userService.verifyEmailOTP(email , userOtp)
         
         res.status(resp.statusCode).json({success : resp.success , message : resp.message })
 
