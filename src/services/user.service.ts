@@ -100,5 +100,25 @@ export const userService = {
         }else{
             return new ApiError(400 , "Invalid OTP")
         }
+    },
+    
+    async reSendOTP(email: string ): Promise<ApiResponce<null> | ApiError>{
+        const userExist = await userRepo.findone({email : email});
+        // console.log("userExist : ",userExist);
+        
+        if(userExist.statusCode != 200){
+            return new ApiError(userExist.statusCode , userExist.message)
+        }
+        // console.log("save otp :",typeof( userExist.data?.emailOTP));
+        // console.log("send otp :",typeof( userOTP));
+        const sendVerificationResult = await SendEmailVerifaction(
+                {email : userExist.data?.email! , username: userExist.data?.name!}
+            )
+            // return new ApiResponce(userdata.statusCode , userdata.message , userdata.data)
+        
+            return new ApiResponce(sendVerificationResult.statusCode ,sendVerificationResult.message,null)
+        
     }
+
+
 }
