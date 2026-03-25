@@ -15,7 +15,6 @@ const UserModal = new Schema<TUser>({
     },
     password: {
         type: String,
-        required: true,
         sparse: true,
     },
     role: {
@@ -30,7 +29,7 @@ const UserModal = new Schema<TUser>({
     },
     githubUsername: {
         type: String,
-        unique: true,
+        unique: true,   
         sparse: true,
     },
     githubAccessToken: {

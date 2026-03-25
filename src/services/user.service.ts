@@ -1,5 +1,5 @@
 import asyncHandler from "express-async-handler"
-import type { EmailRegistrationSchemaType, GithubRegistrationSchemaType, UserLoginSchemaType } from "../validations/user.velidation.js"
+import type { EmailRegistrationSchemaType, UserLoginSchemaType } from "../validations/user.velidation.js"
 import type { TUser } from "../Types.js"
 import { ApiResponce } from "../utils/ApiResponce.js"
 import { ApiError } from "../utils/ApiError.js"
@@ -41,26 +41,6 @@ export const userService = {
     
     
     
-    
-    
-    // async githubRegister(data : GithubRegistrationSchemaType) : Promise<ApiResponce<TUser> | ApiError> {
-    //     const userExist = await userRepo.findone({email : data.email});
-    //     if(userExist.success == false){
-    //         return new ApiError(userExist.statusCode , userExist.message)
-    //     }
-        
-    //     const userdata = await userRepo.createUser(data);
-    //     if(userdata.success == false){
-    //         return new ApiError(userExist.statusCode , userExist.message)
-    //     }
-        
-    //     return new ApiResponce(userdata.statusCode , userdata.message , userdata.data)
-    // } 
-
-    
-    
-    
-    
     // User Login Login through Email !!!
     async userLogin(data : UserLoginSchemaType): Promise<ApiResponce<string | null> | ApiError> {
         const userExist = await userRepo.findone({email : data.email});
@@ -82,6 +62,9 @@ export const userService = {
         return new ApiError(400 , "Incurrect password")
     },
     
+    
+    
+    
     async verifyEmailOTP(email: string , userOTP: number): Promise<ApiResponce<null> | ApiError>{
         const userExist = await userRepo.findone({email : email});
         // console.log("userExist : ",userExist);
@@ -102,6 +85,9 @@ export const userService = {
         }
     },
     
+    
+    
+    
     async reSendOTP(email: string ): Promise<ApiResponce<null> | ApiError>{
         const userExist = await userRepo.findone({email : email});
         // console.log("userExist : ",userExist);
@@ -118,7 +104,20 @@ export const userService = {
         
             return new ApiResponce(sendVerificationResult.statusCode ,sendVerificationResult.message,null)
         
+    },
+
+    async getUserData(userId : string):Promise<ApiResponce<TUser> | ApiError>{
+         const userExist = await userRepo.findById(userId);
+        // console.log("userExist : ",userExist);
+        
+        if(userExist.success == false){
+            return new ApiError(userExist.statusCode , userExist.message)
+        }
+            return new ApiResponce(userExist.statusCode ,userExist.message, userExist.data)
+
     }
 
 
+
+   
 }

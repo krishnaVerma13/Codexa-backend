@@ -35,7 +35,7 @@ export const userRepo = {
     },
     
    
-    async updateUser(data : UpdateUserSchema): Promise<ApiResponce<object> | ApiError>{
+    async updateUser(data : UpdateUserSchema): Promise<ApiResponce<TUser> | ApiError>{
         console.log("updateuser call")
         const userData = await User.findOneAndUpdate(data.filter , data.update , {new : true});
         if(userData){
