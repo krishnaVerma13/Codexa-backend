@@ -19,13 +19,13 @@ declare global {
 export const AuthMiddleware = asyncHandler(
   async (req: Request, _res: Response, next: NextFunction) => {
     // 1. Extract token from header or cookie
-    const token =
-      req.cookies?.accessToken ||
-      req.headers["authorization"]?.replace("Bearer ", "");
+    const token = req.cookies?.accessToken || req.headers["authorization"]?.replace("Bearer ", "");
 
     if (!token) {
       throw new ApiError(401, "Unauthorized: No token provided");
     }
+    // console.log("Authmiddel call token :", token);
+    
 
     // 2. Verify and decode
     const decoded = await JwtToken.verifyToken(token) ;

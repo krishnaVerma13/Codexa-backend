@@ -120,6 +120,8 @@ export const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
 export const getCurrentUserData = asyncHandler(async(req : Request , res : Response)=>{
     try {
         const user = req.user;
+        console.log("call api :");
+        
         const resp = await userService.getUserData(user?.userId!)
         res.status(resp.statusCode).json({success : resp.success , message : resp.message , data : resp.data })
         
