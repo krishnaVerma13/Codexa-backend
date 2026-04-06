@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import axios from "axios";
 import { userRepo } from "../repository/user.repo.js";
 import { JwtToken } from "../config/Jwt.js";
+import { githubRepo } from "../repository/github.repo.js";
 
 export const githubLoginService = async(code : string ) : Promise<ApiResponce<string> | ApiError>=>{
     // return new ApiError(400,"")                                                                                                                                                                                                                                                                                                                                                                                                                                                      
@@ -94,4 +95,20 @@ export const githubLoginService = async(code : string ) : Promise<ApiResponce<st
 
 return new ApiResponce(200 , "User Github login sucessfully !! ", token)
 
+}
+
+export const githubServer = {
+
+  async getAllPublicRepos(userName :string) : Promise<ApiResponce<any> | ApiError>{
+    if(!userName){
+      return new ApiError(400 , "userName query parameter is required")
+    }
+    const resp = await githubRepo.getAllPublicRepos(userName)
+    
+    console.log("github responce : ", resp);
+    if(resp.success == true){
+        return new ApiResponce(resp.statusCode , resp.message , resp.data)
+    }
+    return new ApiError(resp.statusCode , resp.message)
+  }
 }

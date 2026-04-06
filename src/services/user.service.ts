@@ -12,6 +12,7 @@ export const userService = {
     
     // User Sign through Email and password !!!!
     async emailRegister(data : EmailRegistrationSchemaType) : Promise<ApiResponce<TUser | null> | ApiError> {
+       
         const userExist = await userRepo.findone({email : data.email});
         console.log("userExist : ",userExist);
         

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { getCurrentUserData, loginUser, registerUser, resendOtp, verifyOtp } from "./controllers/userController.js";
-import { githubCallBack, githubRedirect } from "./controllers/githubController.js";
+import { getAllPublicRepos, githubCallBack, githubRedirect } from "./controllers/githubController.js";
 import { AuthMiddleware } from "./middleware/authMiddleware.js";
 
 const router = Router();
@@ -12,6 +12,7 @@ router.post("/resendOtp" , resendOtp );
 
 router.get('/github' , githubRedirect)
 router.get('/github/callback' , githubCallBack)
+router.get("/github/:userName/public/all-repos" , AuthMiddleware , getAllPublicRepos)
 
 router.get("/getData" , AuthMiddleware , getCurrentUserData )
 
