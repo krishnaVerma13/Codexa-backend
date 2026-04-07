@@ -1,7 +1,7 @@
 import type { Request, Response } from "express"
 import asyncHandler from "express-async-handler"
 import { randomUUID } from "node:crypto"
-import { githubLoginService, githubServer } from "../services/github.service.js"
+import { githubLoginService, githubService } from "../services/github.service.js"
 import { ZodError } from "zod"
 
 export const githubRedirect = asyncHandler(async (req: Request, res: Response) => {
@@ -42,13 +42,73 @@ export const githubCallBack = asyncHandler(async (req: Request, res: Response) =
     }
 })
 
+
+
 export const getAllPublicRepos = asyncHandler(async(req : Request , res : Response)=>{
     try {
            const {userName} = req.params;
 
            console.log("user name :",userName);
 
-           const resp = await githubServer.getAllPublicRepos(userName as string)
+           const resp = await githubService.getAllPublicRepos(userName as string)
+           
+            res.status(resp.statusCode).json({success : resp.success , message : resp.message , data: resp.data })
+        } catch (error) {
+            if (error instanceof ZodError) {
+                const err = error.issues.map((err) => ({
+                    field: err.path.join("."),
+                    message: err.message
+                }));
+                res.status(400).json({
+                    success: false,
+                    message: "Validation failed",
+                    errors: err
+                });
+                return;
+            }
+        throw error;
+    }
+})
+
+
+export const getPublicRepos = asyncHandler(async(req : Request , res : Response)=>{
+    try {
+           const {full_name} = req.params;
+
+           console.log("full name :",full_name);
+
+           const resp = await githubService.getPublicRepo(full_name as string)
+           
+            res.status(resp.statusCode).json({success : resp.success , message : resp.message , data: resp.data })
+        } catch (error) {
+            if (error instanceof ZodError) {
+                const err = error.issues.map((err) => ({
+                    field: err.path.join("."),
+                    message: err.message
+                }));
+                res.status(400).json({
+                    success: false,
+                    message: "Validation failed",
+                    errors: err
+                });
+                return;
+            }
+        throw error;
+    }
+})
+
+
+export const getRepoFiles = asyncHandler(async(req : Request , res : Response)=>{
+    try {
+
+           const {full_name , sha , type} = req.body;
+          
+            const basetRepo = sha || "main"
+            const deftaultType = type === "blob" ? "blobs" : "trees"
+
+           console.log("full name :",full_name , "sha : ",basetRepo);
+
+           const resp = await githubService.getFolderTree(full_name as string, basetRepo as string , deftaultType )
            
             res.status(resp.statusCode).json({success : resp.success , message : resp.message , data: resp.data })
         } catch (error) {

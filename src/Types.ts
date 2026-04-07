@@ -20,3 +20,22 @@ export interface UpdateUserSchema{
         filter : object,
         update : object,
     }
+
+export interface GetFilesSchema {
+    full_name : string,
+    sha? : string,
+    type? : string
+}
+
+
+export interface GithubRepoResponce {
+    id: number;
+    name: string;
+    full_name: string;
+    description: string;
+    html_url: string;
+    stargazers_count: number;
+    language: string;
+    created_at: string;
+    updated_at: string;
+}
