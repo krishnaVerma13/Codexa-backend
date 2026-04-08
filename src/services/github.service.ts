@@ -117,7 +117,7 @@ export const githubService = {
     }
     const resp = await githubRepo.getAllPublicRepos(userName)
 
-    console.log("github responce : ", resp);
+    // console.log("github responce : ", resp);
     if (resp.success == true) {
 
       const reposData = resp.data.map((repo: any) => ({
@@ -131,26 +131,21 @@ export const githubService = {
         created_at: repo.created_at,
         updated_at: repo.updated_at
       }));
-        console.log("repodata :", reposData);
+        // console.log("repodata :", reposData);
         
       return new ApiResponce(resp.statusCode, resp.message, reposData)
     }
     return new ApiError(resp.statusCode, resp.message)
   },
 
-  async getPublicRepo(full_name: string): Promise<ApiResponce<any> | ApiError> {
-    if (!full_name) {
-      return new ApiError(400, "full_name query parameter is required")
-    }
-    const resp = await githubRepo.getPublicRepo(full_name)
+  
+  
+  
+ 
 
-    console.log("repo content : ", resp);
-    if (resp.success == true) {
-      return new ApiResponce(resp.statusCode, resp.message, resp.data)
-    }
-    return new ApiError(resp.statusCode, resp.message)
-  },
-
+ 
+ 
+ 
   async getFolderTree(full_name :string , sha: string , type : string): Promise<ApiResponce<any> | ApiError> {
     if (!full_name) {
       return new ApiError(400, "full_name query parameter is required")
@@ -162,5 +157,25 @@ export const githubService = {
       return new ApiResponce(resp.statusCode, resp.message, resp.data)
     }
     return new ApiError(resp.statusCode, resp.message)
+  },
+  
+  
+  
+  
+  async getFileContent (full_name :string , path: string ): Promise<ApiResponce<any> | ApiError> {
+    if (!full_name ) {
+      return new ApiError(400, "full_name  parameters are required")
+    }
+    const resp = await githubRepo.getFileContent(full_name, path)
+
+    console.log("repo content : ", resp);
+    if (resp instanceof ApiError) {
+      return new ApiError(resp.statusCode, resp.message , resp.errors)
+    }
+    return new ApiResponce(resp.statusCode, resp.message, resp.data)
   }
+
+
+
+
 }

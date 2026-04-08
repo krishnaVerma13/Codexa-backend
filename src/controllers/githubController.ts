@@ -3,6 +3,7 @@ import asyncHandler from "express-async-handler"
 import { randomUUID } from "node:crypto"
 import { githubLoginService, githubService } from "../services/github.service.js"
 import { ZodError } from "zod"
+import { ApiError } from "../utils/ApiError.js"
 
 export const githubRedirect = asyncHandler(async (req: Request, res: Response) => {
     const state = crypto.randomUUID()
@@ -47,8 +48,10 @@ export const githubCallBack = asyncHandler(async (req: Request, res: Response) =
 export const getAllPublicRepos = asyncHandler(async(req : Request , res : Response)=>{
     try {
            const {userName} = req.params;
+           const user = req.user;
 
            console.log("user name :",userName);
+           console.log("user  :",user);
 
            const resp = await githubService.getAllPublicRepos(userName as string)
            
@@ -71,14 +74,24 @@ export const getAllPublicRepos = asyncHandler(async(req : Request , res : Respon
 })
 
 
-export const getPublicRepos = asyncHandler(async(req : Request , res : Response)=>{
+
+
+
+export const getRepoFiles = asyncHandler(async(req : Request , res : Response)=>{
     try {
-           const {full_name} = req.params;
 
-           console.log("full name :",full_name);
+           const {full_name , sha , type} = req.body;
+          
+            const basetRepo = sha || "main"
+            const deftaultType = type === "blob" ? "blobs" : "trees"
 
-           const resp = await githubService.getPublicRepo(full_name as string)
-           
+           console.log("full name :",full_name , "sha : ",basetRepo);
+
+           const resp = await githubService.getFolderTree(full_name as string, basetRepo as string , deftaultType )
+           if(resp.success == false && resp instanceof ApiError){
+               res.status(resp.statusCode).json({success : resp.success , message : resp.message , errors: resp.errors })
+               return
+           }
             res.status(resp.statusCode).json({success : resp.success , message : resp.message , data: resp.data })
         } catch (error) {
             if (error instanceof ZodError) {
@@ -98,17 +111,19 @@ export const getPublicRepos = asyncHandler(async(req : Request , res : Response)
 })
 
 
-export const getRepoFiles = asyncHandler(async(req : Request , res : Response)=>{
+
+
+
+export const getFileContents = asyncHandler(async(req : Request , res : Response)=>{
     try {
-
-           const {full_name , sha , type} = req.body;
+            console.log("get file contents call!!!");
+            
+           const {full_name , path } = req.body;
           
-            const basetRepo = sha || "main"
-            const deftaultType = type === "blob" ? "blobs" : "trees"
 
-           console.log("full name :",full_name , "sha : ",basetRepo);
+           console.log("full name in file contents :",full_name);
 
-           const resp = await githubService.getFolderTree(full_name as string, basetRepo as string , deftaultType )
+           const resp = await githubService.getFileContent(full_name as string, path as string )
            
             res.status(resp.statusCode).json({success : resp.success , message : resp.message , data: resp.data })
         } catch (error) {
