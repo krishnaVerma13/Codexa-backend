@@ -18,7 +18,7 @@ export const githubLoginService = async (code: string): Promise<ApiResponce<stri
     },
     { headers: { Accept: 'application/json  ' } }
   )
-  console.log("token responce -tokenRes - :", tokenRes);
+  // console.log("token responce -tokenRes - :", tokenRes);
 
   const githubAccessToken = tokenRes.data.access_token
 
@@ -141,18 +141,13 @@ export const githubService = {
   
   
   
- 
-
- 
- 
- 
-  async getFolderTree(full_name :string , sha: string , type : string): Promise<ApiResponce<any> | ApiError> {
+ async getFolderTree(full_name :string , sha: string , type : string): Promise<ApiResponce<any> | ApiError> {
     if (!full_name) {
       return new ApiError(400, "full_name query parameter is required")
     }
     const resp = await githubRepo.getFolderTree(full_name, sha, type)
 
-    console.log("repo content : ", resp);
+    // console.log("repo content : ", resp);
     if (resp.success == true) {
       return new ApiResponce(resp.statusCode, resp.message, resp.data)
     }

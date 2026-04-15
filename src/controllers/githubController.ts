@@ -6,6 +6,9 @@ import { ZodError } from "zod"
 import { ApiError } from "../utils/ApiError.js"
 
 export const githubRedirect = asyncHandler(async (req: Request, res: Response) => {
+
+    console.log("githubRedirect call in controller !!");
+        
     const state = crypto.randomUUID()
 
     res.cookie("oauth_state", state, {
@@ -27,6 +30,9 @@ export const githubRedirect = asyncHandler(async (req: Request, res: Response) =
 export const githubCallBack = asyncHandler(async (req: Request, res: Response) => {
     const { code, state } = req.query
 
+    console.log("githubCallBack call in controller !!");
+    
+
     // console.log("github callback req :",req.cookies);
     // console.log("cookies in callback :",req.cookies.oauth_state);
     // console.log("callback controller code :",code," state :",state);
@@ -47,15 +53,22 @@ export const githubCallBack = asyncHandler(async (req: Request, res: Response) =
 
 export const getAllPublicRepos = asyncHandler(async(req : Request , res : Response)=>{
     try {
+            console.log("getAllPublicRepos call in controller !!");
+            
            const {userName} = req.params;
            const user = req.user;
 
-           console.log("user name :",userName);
-           console.log("user  :",user);
+        //    console.log("user name :",userName);
+        //    console.log("call  :");
 
            const resp = await githubService.getAllPublicRepos(userName as string)
+           if(resp.success == true){
+               res.status(resp.statusCode).json({success : resp.success , message : resp.message , data: resp.data })
+            } else {
+                res.status(resp.statusCode).json({success : resp.success , message : resp.message , errors: resp instanceof ApiError ? resp.errors : ["Unknown error"] })
+            }
+
            
-            res.status(resp.statusCode).json({success : resp.success , message : resp.message , data: resp.data })
         } catch (error) {
             if (error instanceof ZodError) {
                 const err = error.issues.map((err) => ({
@@ -79,15 +92,18 @@ export const getAllPublicRepos = asyncHandler(async(req : Request , res : Respon
 
 export const getRepoFiles = asyncHandler(async(req : Request , res : Response)=>{
     try {
+             console.log("getRepoFiles call in controller !!");
 
-           const {full_name , sha , type} = req.body;
+           const {data} = req.body;
           
-            const basetRepo = sha || "main"
-            const deftaultType = type === "blob" ? "blobs" : "trees"
+            const basetRepo = data.sha || "main"
+            const deftaultType = data.type === "blob" ? "blobs" : "trees"
 
-           console.log("full name :",full_name , "sha : ",basetRepo);
+        //    console.log("full name :",full_name , "sha : ",basetRepo);
 
-           const resp = await githubService.getFolderTree(full_name as string, basetRepo as string , deftaultType )
+           const resp = await githubService.getFolderTree(data.full_name as string, basetRepo as string , deftaultType )
+           console.log("all repo :",resp);
+           
            if(resp.success == false && resp instanceof ApiError){
                res.status(resp.statusCode).json({success : resp.success , message : resp.message , errors: resp.errors })
                return
@@ -116,16 +132,23 @@ export const getRepoFiles = asyncHandler(async(req : Request , res : Response)=>
 
 export const getFileContents = asyncHandler(async(req : Request , res : Response)=>{
     try {
-            console.log("get file contents call!!!");
+            console.log("getFileContents call in controller !!");
             
-           const {full_name , path } = req.body;
+           const {data } = req.body;
           
 
-           console.log("full name in file contents :",full_name);
+           console.log("full name in file contents :",data.full_name);
+           console.log("path in file contents :",data.path);
 
-           const resp = await githubService.getFileContent(full_name as string, path as string )
-           
+           const resp = await githubService.getFileContent(data.full_name as string, data.path as string )
+        //    console.log("resp :",resp);
+        if(resp.success == false && resp instanceof ApiError){
+                res.status(resp.statusCode).json({success : resp.success , message : resp.message , errors: resp.errors })
+        }else{
+
             res.status(resp.statusCode).json({success : resp.success , message : resp.message , data: resp.data })
+        }
+           
         } catch (error) {
             if (error instanceof ZodError) {
                 const err = error.issues.map((err) => ({

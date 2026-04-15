@@ -24,20 +24,28 @@ export const githubRepo = {
     async getFolderTree(full_name: string, sha: string, type: string): Promise<ApiResponce<any> | ApiError> {
         try {
             const url = `${GITHUB_API}/repos/${full_name}/git/${type}/${sha}`
-            // log("url : ", url);
+            log("url : ", url);
             const response = await axios.get(url)
             return new ApiResponce(200, "Public repositories fetched successfully", response.data)
         } catch (error) {
+            // console.log("error :",error);   
+            
+            if (axios.isAxiosError(error)) {
+                return new ApiError(error?.response?.status || 500, error?.response?.data?.message || "Failed to fetch public repositories", [error instanceof Error ? error.message : "Unknown error"])
+            }
             return new ApiError(500, "Failed to fetch public repositories", [error instanceof Error ? error.message : "Unknown error"])
         }
     },
 
+
     async getFileContent(full_name: string, path: string): Promise<ApiResponce<any> | ApiError> {
         try {
             const url = `${GITHUB_API}/repos/${full_name}/contents/${path ? path : ""}`
-            // log("url : ", url);
+            log("url : ", url);
+            // console.log("file content responce : ");
             const response = await axios.get(url)
-            // console.log("responce : ", response);
+
+            
             //   if(response.status === 200){
             return new ApiResponce(200, "Public repositories fetched successfully", response.data)
             // }
@@ -61,7 +69,7 @@ export const githubRepo = {
                         ]);
 
                     case 404:
-                        return new ApiError(404, "Not found", [
+                        return new ApiError(404, "Not found data", [
                             `File not found`
                         ]);
 
