@@ -73,7 +73,7 @@ export const verifyOtp = asyncHandler(async (req: Request, res: Response) => {
     try {
         const { email, otp } = req.body;
         const userOtp = parseInt(otp);        
-        // console.log("controller otp : ",typeof(userOtp));
+        console.log("controller email : ",email);
         const resp = await userService.verifyEmailOTP(email , userOtp)
         res.status(resp.statusCode).json({success : resp.success , message : resp.message })
     } catch (error) {
@@ -139,6 +139,37 @@ export const getCurrentUserData = asyncHandler(async(req : Request , res : Respo
             return;
         }
     throw error;
+    }
+})
+
+
+export const VerifyEmail = asyncHandler(async(req : Request , res : Response)=>{
+    try {
+        const {email} =  req.body
+        if(!email){
+             res.status(400).json({
+                success: false,
+                message: "Email is required",
+            });
+        }
+        const resp = await userService.userVerifyEmail(email)
+            res.status(resp.statusCode).json({ success: resp.success, message: resp.message });
+          
+           
+        } catch (error) {
+            if (error instanceof ZodError) {
+                const err = error.issues.map((err) => ({
+                    field: err.path.join("."),
+                    message: err.message
+                }));
+                res.status(400).json({
+                    success: false,
+                    message: "Validation failed",
+                    errors: err
+                });
+                return;
+            }
+        throw error;
     }
 })
 

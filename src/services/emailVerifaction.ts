@@ -3,6 +3,7 @@ import { EmailTemplate } from '../utils/EmailTemplate.js';
 import { userRepo } from '../repository/user.repo.js';
 import { ApiError } from '../utils/ApiError.js';
 import { ApiResponce } from '../utils/ApiResponce.js';
+import { ResetPasswordTemplate } from '../utils/ResetPasswordTemplate.js';
 
 
 
@@ -16,7 +17,7 @@ function rendomNumber() {
 }
 
 
-export const SendEmailVerifaction = async (data: EmailVerifactoin): Promise<ApiError | ApiResponce<null>> => {
+export const SendEmailVerifaction = async (data: EmailVerifactoin , template : string): Promise<ApiError | ApiResponce<null>> => {
     
     const transporter = nodemailer.createTransport({
         service: "gmail",
@@ -46,7 +47,7 @@ export const SendEmailVerifaction = async (data: EmailVerifactoin): Promise<ApiE
         from: `"Codexa" <${process.env.EMAIL_USER}>`,
         to: data.email,
         subject: `${verifyCode} is your Codexa verification code`,
-        html: EmailTemplate(verifyCode, data.username),
+        html: template == "resetpassword" ? ResetPasswordTemplate(verifyCode, data.username , "reset") :EmailTemplate(verifyCode, data.username),
     });
 
     return new ApiResponce(200 , "Verification code sent to email" , null)

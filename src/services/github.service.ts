@@ -8,6 +8,7 @@ import type { GithubRepoResponce } from "../Types.js";
 
 export const githubLoginService = async (code: string): Promise<ApiResponce<string> | ApiError> => {
   // return new ApiError(400,"")                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+  // console.log("github login call !!");
 
   const tokenRes = await axios.post(
     'https://github.com/login/oauth/access_token',
@@ -73,7 +74,11 @@ export const githubLoginService = async (code: string): Promise<ApiResponce<stri
           authType: 'github',
         }
       })
-      console.log("github token :", githubAccessToken);
+      // console.log("github token :", githubAccessToken);
+      //   5. Issue your own JWT pair
+      const token = await JwtToken.generateToken({ userId: user.data?._id! })
+      // console.log("existing user new token  :", token);
+      return new ApiResponce(200, "User Github login sucessfully !! ", token)
 
     } else {
       // Case 3: brand new user
@@ -86,6 +91,12 @@ export const githubLoginService = async (code: string): Promise<ApiResponce<stri
         githubAccessToken: githubAccessToken,
         authType: 'github',
       })
+
+      //   5. Issue your own JWT pair
+      const token = await JwtToken.generateToken({ userId: user.data?._id! })
+      // console.log("existing user new token  :", token);
+      return new ApiResponce(200, "New User Github login sucessfully !! ", token)
+
       //   console.log("else state user :",user);
 
     }
@@ -98,16 +109,19 @@ export const githubLoginService = async (code: string): Promise<ApiResponce<stri
         githubAccessToken: githubAccessToken
       }
     })
+
+    //   5. Issue your own JWT pair
+    const token = await JwtToken.generateToken({ userId: user.data?._id! })
+    // console.log("existing user new token  :", token);
+    return new ApiResponce(200, "Github login sucessfully and new token  !! ", token)
+
   }
 
-  //   5. Issue your own JWT pair
-  const token = await JwtToken.generateToken({ userId: user.data?._id! })
-  //   console.log("my token  :",token);
-
-
-  return new ApiResponce(200, "User Github login sucessfully !! ", token)
-
+  return new ApiError(400, 'Somthing wents wrong user not login process not done properly')
 }
+
+
+
 
 export const githubService = {
 
@@ -131,17 +145,17 @@ export const githubService = {
         created_at: repo.created_at,
         updated_at: repo.updated_at
       }));
-        // console.log("repodata :", reposData);
-        
+      // console.log("repodata :", reposData);
+
       return new ApiResponce(resp.statusCode, resp.message, reposData)
     }
     return new ApiError(resp.statusCode, resp.message)
   },
 
-  
-  
-  
- async getFolderTree(full_name :string , sha: string , type : string): Promise<ApiResponce<any> | ApiError> {
+
+
+
+  async getFolderTree(full_name: string, sha: string, type: string): Promise<ApiResponce<any> | ApiError> {
     if (!full_name) {
       return new ApiError(400, "full_name query parameter is required")
     }
@@ -153,19 +167,19 @@ export const githubService = {
     }
     return new ApiError(resp.statusCode, resp.message)
   },
-  
-  
-  
-  
-  async getFileContent (full_name :string , path: string ): Promise<ApiResponce<any> | ApiError> {
-    if (!full_name ) {
+
+
+
+
+  async getFileContent(full_name: string, path: string): Promise<ApiResponce<any> | ApiError> {
+    if (!full_name) {
       return new ApiError(400, "full_name  parameters are required")
     }
     const resp = await githubRepo.getFileContent(full_name, path)
 
-    console.log("repo content : ", resp);
+    // console.log("repo content : ", resp);
     if (resp instanceof ApiError) {
-      return new ApiError(resp.statusCode, resp.message , resp.errors)
+      return new ApiError(resp.statusCode, resp.message, resp.errors)
     }
     return new ApiResponce(resp.statusCode, resp.message, resp.data)
   }

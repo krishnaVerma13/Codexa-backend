@@ -141,7 +141,7 @@ export const getFileContents = asyncHandler(async(req : Request , res : Response
            console.log("path in file contents :",data.path);
 
            const resp = await githubService.getFileContent(data.full_name as string, data.path as string )
-        //    console.log("resp :",resp);
+           console.log("resp :",resp);
         if(resp.success == false && resp instanceof ApiError){
                 res.status(resp.statusCode).json({success : resp.success , message : resp.message , errors: resp.errors })
         }else{
@@ -165,3 +165,4 @@ export const getFileContents = asyncHandler(async(req : Request , res : Response
         throw error;
     }
 })
+
