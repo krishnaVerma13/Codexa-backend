@@ -19,6 +19,7 @@ export interface IAnalysisScores {
 export interface IRawAIAnalysis {
   scores: IAnalysisScores;
   overallScore: number;
+  suggestions: string[];
 }
 
 // Request body for editor analysis
@@ -47,6 +48,7 @@ export interface IAnalysisDocument {
   codeSnapshot: string;
   scores: IAnalysisScores;
   overallScore: number;
+  suggestions: string[];
   createdAt: Date;
 }
 

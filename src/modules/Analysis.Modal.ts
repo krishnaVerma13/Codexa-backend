@@ -20,6 +20,7 @@ export interface IAnalysis extends Document {
     bestPractices: IDimensionScore;
   };
   overallScore: number;
+  suggestions: string[];
   createdAt: Date;
 }
 
@@ -75,6 +76,10 @@ const AnalysisSchema = new Schema<IAnalysis>(
       min: 0,
       max: 100,
     },
+    suggestions: {
+      type: [String],
+      required: true
+    }
   },
   {
     timestamps: true,

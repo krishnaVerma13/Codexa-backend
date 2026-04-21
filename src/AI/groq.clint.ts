@@ -24,6 +24,7 @@ export interface IGroqAnalysisResponse {
     bestPractices: IGroqDimensionScore;
   };
   overallScore: number;
+   suggestions: string[];
 }
 
 const validateDimension = (dim: unknown): IGroqDimensionScore => {
@@ -86,6 +87,7 @@ export const analyzeWithGroq = async (
       typeof parsed.overallScore === "number"
         ? parsed.overallScore
         : 0, // fallback — will be overwritten by your calculateOverallScore anyway
+    suggestions : Array.isArray(parsed.suggestions) ? parsed.suggestions as string[] : [],
   };
 
   return validated; // ← always returns, no void path

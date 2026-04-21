@@ -11,6 +11,7 @@ interface ICreateAnalysisPayload {
     codeSnapshot: string;
     scores: IAnalysisScores ;
     overallScore: number;
+     suggestions: string[];
 }
 
 const createAnalysis = async (payload: ICreateAnalysisPayload): Promise<IAnalysisDocument> => { 
@@ -20,6 +21,11 @@ const createAnalysis = async (payload: ICreateAnalysisPayload): Promise<IAnalysi
     const doc = await Analysis.create(cleanPayload);
     return doc.toObject() as unknown as IAnalysisDocument;
 };
+
+
+
+
+
 
 const getAnalysesByUserId = async (
     userId: Types.ObjectId,

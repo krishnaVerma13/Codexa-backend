@@ -20,7 +20,7 @@ Language: ${language}
 
 Analyze the following code and score it across 5 dimensions.
 Each score must be between 0 and 100.
-Each reason must be 1-2 sentences, specific to the actual code provided.
+Each reason must be 1-2 specific points tied to the actual code provided.
 Do not give generic reasons. Point to actual issues or strengths found in the code.
 
 Scoring guide:
@@ -32,26 +32,33 @@ Scoring guide:
 
 Dimensions to evaluate:
 
-1. cleanCode
-   - Naming conventions, readability, function length
-   - Single responsibility, DRY principle, comments quality
+1. readability
+   - Naming conventions, function length, clarity of logic
+   - Single responsibility, DRY principle, comment quality
 
-2. security
-   - Input validation, injection risks, sensitive data exposure
-   - Authentication checks, error message leakage, dependency risks
-
-3. performance
+2. efficiency
    - Time complexity, unnecessary loops, redundant computation
    - Memory usage, async handling, database query efficiency
+
+3. security
+   - Input validation, injection risks, sensitive data exposure
+   - Authentication checks, error message leakage, dependency risks
 
 4. maintainability
    - Code structure, modularity, separation of concerns
    - Ease of extension, coupling, cohesion
 
-5. testing
+5. bestPractices
    - Presence of test cases, edge case coverage
    - Testability of functions, mock-ability of dependencies
    - If no tests present, score based on how testable the code is
+
+For each dimension:
+- If score < 70: identify the specific problem found in the code
+- If score >= 70: confirm what is done well AND suggest one enhancement
+
+Also provide a "suggestions" array: 3-5 short, direct, actionable improvements
+specific to this code. Each suggestion max 15 words. No generic advice.
 
 Code to analyze:
 \`\`\`${language}
@@ -59,16 +66,21 @@ ${code}
 \`\`\`
 
 You MUST respond with ONLY this exact JSON structure, no other keys:
-    {
-      "scores": {
-        "readability":     { "score": <0-100>, "reason": "<string>" },
-        "efficiency":      { "score": <0-100>, "reason": "<string>" },
-        "security":        { "score": <0-100>, "reason": "<string>" },
-        "maintainability": { "score": <0-100>, "reason": "<string>" },
-        "bestPractices":   { "score": <0-100>, "reason": "<string>" }
-      },
-      "overallScore": <0-100>
-    }
+{
+  "scores": {
+    "readability":     { "score": <0-100>, "reason": "<specific issue or strength + enhancement>" },
+    "efficiency":      { "score": <0-100>, "reason": "<specific issue or strength + enhancement>" },
+    "security":        { "score": <0-100>, "reason": "<specific issue or strength + enhancement>" },
+    "maintainability": { "score": <0-100>, "reason": "<specific issue or strength + enhancement>" },
+    "bestPractices":   { "score": <0-100>, "reason": "<specific issue or strength + enhancement>" }
+  },
+  "overallScore": <0-100>,
+  "suggestions": [
+    "<actionable suggestion 1>",
+    "<actionable suggestion 2>",
+    "<actionable suggestion 3>"
+  ]
+}
 
-    Do NOT rename keys. Do NOT add extra fields. Do NOT wrap in markdown.`;
+Do NOT rename keys. Do NOT add extra fields. Do NOT wrap in markdown.`;
 };

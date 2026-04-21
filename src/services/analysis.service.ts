@@ -69,9 +69,11 @@ const analyzeFromEditor = async (
 ): Promise<IAnalysisDocument | ApiError> => {
 
     const { code, language, fileName } = body;
-
+   
+    const StrCode = typeof(code) != 'string' ? JSON.stringify(code) : code;
+   
     const prompt = buildCodeAnalysisPrompt({
-        code,
+        code: StrCode,
         language,
         sourceType: "editor",
         fileName,
@@ -90,6 +92,7 @@ const analyzeFromEditor = async (
             codeSnapshot: code,
             scores: aiResult.scores,
             overallScore: aiResult.overallScore,
+            suggestions : aiResult.suggestions,
         });
     }
 };
@@ -99,29 +102,39 @@ const analyzeFromEditor = async (
 const analyzeFromGithub = async (
     userId: Types.ObjectId,
     body: IAnalyzeFromGithubBody
-): Promise<IAnalysisDocument | void> => {
+): Promise<IAnalysisDocument | ApiError> => {
     const { code, language, repoName, fileName } = body;
+    const StrCode = typeof(code) != 'string' ? JSON.stringify(code) : code;
 
     const prompt = buildCodeAnalysisPrompt({
-        code,
+        code : StrCode,
         language,
         sourceType: "github",
         fileName,
     });
 
     const aiResult = await runAIAnalysis(prompt);
-
-    // return analysisRepository.createAnalysis({
-    //     userId,
-    //     language,
-    //     sourceType: "github",
-    //     fileName,
-    //     repoName,
-    //     codeSnapshot: code,
-    //     scores: aiResult.scores,
-    //     overallScore: aiResult.overallScore,
-    // });
+    if (aiResult instanceof ApiError) {
+        return aiResult
+    } else {
+        return analysisRepository.createAnalysis({
+            userId,
+            language,
+            sourceType: "github",
+            fileName,
+            repoName,
+            codeSnapshot: code,
+            scores: aiResult.scores,
+            overallScore: aiResult.overallScore,
+            suggestions: aiResult.suggestions,
+        });
+    };
 };
+
+
+
+
+
 
 // ── History ───────────────────────────────────────────────────────────────────
 
@@ -133,6 +146,11 @@ const getAnalysesByUser = async (
     const { analyses, total } = await analysisRepository.getAnalysesByUserId(userId, page, limit);
     return { analyses, total, totalPages: Math.ceil(total / limit) };
 };
+
+
+
+
+
 
 // ── Single analysis ───────────────────────────────────────────────────────────
 
@@ -155,6 +173,12 @@ const getAnalysisById = async (
 
     return analysis;
 };
+
+
+
+
+
+
 
 export const analysisService = {
     analyzeFromEditor,

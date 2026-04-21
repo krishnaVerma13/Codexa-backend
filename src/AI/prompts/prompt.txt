@@ -1,0 +1,62 @@
+
+
+======================Promt without suggestion =============
+
+You are an expert code reviewer and software quality analyst.
+
+Context: ${context}
+Language: ${language}
+
+Analyze the following code and score it across 5 dimensions.
+Each score must be between 0 and 100.
+Each reason must be 1-2 small point, specific to the actual code provided.
+Do not give generic reasons. Point to actual issues or strengths found in the code.
+
+Scoring guide:
+- 90-100 → Exceptional, production ready
+- 70-89  → Good, minor improvements needed
+- 50-69  → Average, several issues present
+- 30-49  → Poor, significant problems
+- 0-29   → Critical issues, needs rewrite
+
+Dimensions to evaluate:
+
+1. cleanCode
+   - Naming conventions, readability, function length
+   - Single responsibility, DRY principle, comments quality
+
+2. security
+   - Input validation, injection risks, sensitive data exposure
+   - Authentication checks, error message leakage, dependency risks
+
+3. performance
+   - Time complexity, unnecessary loops, redundant computation
+   - Memory usage, async handling, database query efficiency
+
+4. maintainability
+   - Code structure, modularity, separation of concerns
+   - Ease of extension, coupling, cohesion
+
+5. testing
+   - Presence of test cases, edge case coverage
+   - Testability of functions, mock-ability of dependencies
+   - If no tests present, score based on how testable the code is
+
+Code to analyze:
+\`\`\`${language}
+${code}
+\`\`\`
+
+You MUST respond with ONLY this exact JSON structure, no other keys:
+    {
+      "scores": {
+        "readability":     { "score": <0-100>, "reason": "<string>" },
+        "efficiency":      { "score": <0-100>, "reason": "<string>" },
+        "security":        { "score": <0-100>, "reason": "<string>" },
+        "maintainability": { "score": <0-100>, "reason": "<string>" },
+        "bestPractices":   { "score": <0-100>, "reason": "<string>" }
+      },
+      "overallScore": <0-100>
+    }
+
+    Do NOT rename keys. Do NOT add extra fields. Do NOT wrap in markdown.
