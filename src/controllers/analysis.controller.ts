@@ -7,10 +7,12 @@ import {
     analyzeFromEditorSchema,
     analyzeFromGithubSchema,
     analysisHistorySchema,
+    timelineQuerySchema,
 } from "../validations/analysis.schema.js";
 import { Types, type ObjectId } from "mongoose";
 import mongoose from "mongoose";
 import { success } from "zod";
+import { timelineService } from "../services/timeline.service.js";
 
 
 
@@ -107,3 +109,23 @@ export const getAnalysisById = asyncHandler(async (req: Request, res: Response) 
     res.status(200).json({ success: true, message: "Analysis fetched.", data: analysis });
 
 })
+
+
+// GET /api/analysis/timeline
+export const getTimeline = asyncHandler(async (req: Request, res: Response) => {
+ const userId = getObjectId(req.user ? req.user?.userId : "");
+    if (userId instanceof ApiError) {
+        res.status(400).json({ success: false, message: "Invalid UserId" });
+        return
+    }
+  const { groupBy } = timelineQuerySchema.parse(req.query);
+
+  const timeline = await timelineService.getTimeline(userId, groupBy);
+
+  if(timeline instanceof ApiError){
+      res.status(timeline.statusCode).json({success : false, message : "Timeline fetched fail."  });
+    }
+
+
+  res.status(200).json({success : true, message : "Timeline fetched." , data : timeline });
+});

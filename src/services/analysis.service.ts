@@ -11,6 +11,7 @@ import type {
     IAnalyzeFromEditorBody,
     IAnalyzeFromGithubBody,
 } from "../analysis.Type.js";
+import { patternsService } from "./patterns.service.js";
 
 // ── AI call with Gemini → Groq fallback ──────────────────────────────────────
 
@@ -69,9 +70,9 @@ const analyzeFromEditor = async (
 ): Promise<IAnalysisDocument | ApiError> => {
 
     const { code, language, fileName } = body;
-   
-    const StrCode = typeof(code) != 'string' ? JSON.stringify(code) : code;
-   
+
+    const StrCode = typeof (code) != 'string' ? JSON.stringify(code) : code;
+
     const prompt = buildCodeAnalysisPrompt({
         code: StrCode,
         language,
@@ -84,7 +85,7 @@ const analyzeFromEditor = async (
     if (aiResult instanceof ApiError) {
         return aiResult
     } else {
-        return analysisRepository.createAnalysis({
+        const save = await analysisRepository.createAnalysis({
             userId,
             language,
             sourceType: "editor",
@@ -92,8 +93,14 @@ const analyzeFromEditor = async (
             codeSnapshot: code,
             scores: aiResult.scores,
             overallScore: aiResult.overallScore,
-            suggestions : aiResult.suggestions,
+            suggestions: aiResult.suggestions,
         });
+
+        // ── Phase 2 hook — fire and forget, never block response ──
+        patternsService.runPatternDetection(userId).catch((err) =>
+            console.error("Pattern detection failed silently:", err)
+        );
+        return save;
     }
 };
 
@@ -104,10 +111,10 @@ const analyzeFromGithub = async (
     body: IAnalyzeFromGithubBody
 ): Promise<IAnalysisDocument | ApiError> => {
     const { code, language, repoName, fileName } = body;
-    const StrCode = typeof(code) != 'string' ? JSON.stringify(code) : code;
+    const StrCode = typeof (code) != 'string' ? JSON.stringify(code) : code;
 
     const prompt = buildCodeAnalysisPrompt({
-        code : StrCode,
+        code: StrCode,
         language,
         sourceType: "github",
         fileName,
@@ -117,7 +124,7 @@ const analyzeFromGithub = async (
     if (aiResult instanceof ApiError) {
         return aiResult
     } else {
-        return analysisRepository.createAnalysis({
+        const save = await analysisRepository.createAnalysis({
             userId,
             language,
             sourceType: "github",
@@ -128,6 +135,12 @@ const analyzeFromGithub = async (
             overallScore: aiResult.overallScore,
             suggestions: aiResult.suggestions,
         });
+
+        // ── Phase 2 hook — fire and forget, never block response ──
+        patternsService.runPatternDetection(userId).catch((err) =>
+            console.error("Pattern detection failed silently:", err)
+        );
+        return save;
     };
 };
 

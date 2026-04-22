@@ -8,6 +8,8 @@ import UserRouter from "./router/routers.js";
 import connectDB from "./config/dbConnection.js"
 import cors from "cors" 
 import AnalysisRouter from "./router/analysis.routes.js";
+import PatternRoute from "./router/patterns.route.js"
+import RErouter from "./router/recommendations.route.js";
 
 connectDB()
 const app = express();
@@ -22,10 +24,12 @@ app.use(cors({
 
 app.get("/", (req : Request, res : Response) => {
   res.send("Codexa Backend Running 🚀");
-});
+}); 
 
 app.use("/api/user" , UserRouter );
 app.use("/api/analysis" , AnalysisRouter)
+app.use('/api/patterns' , PatternRoute )
+app.use('/api/recommendations' , RErouter )
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

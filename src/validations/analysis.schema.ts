@@ -17,3 +17,7 @@ export const analysisHistorySchema = z.object({
   page: z.string().regex(/^\d+$/).optional(),
   limit: z.string().regex(/^\d+$/).optional(),
 });
+
+export const timelineQuerySchema = z.object({
+  groupBy: z.enum(["week", "month"]).default("month"),
+});
