@@ -40,6 +40,8 @@ const detectPatternsWithAI = async (prompt: string): Promise<string[]> => {
                 try {
                     const Groq = (await import("groq-sdk")).default;
                     const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
+                    console.log("pettern detcet call AI");
+                    
                     const res = await groq.chat.completions.create({
                         model: "llama-3.3-70b-versatile",
                         temperature: 0.3,
@@ -71,11 +73,14 @@ const runPatternDetection = async (
     userId: mongoose.Types.ObjectId
 ): Promise<IUserPattern | void> => {
     // Pull last 10 analyses
+
+    console.log("run runPatternDetection ");
+    
     const { analyses } = await analysisRepository.getAnalysesByUserId(
         userId,
         1,
         10
-    );
+    ); 
 
     // Min threshold check
     if (analyses.length < MIN_ANALYSES_REQUIRED) return;
@@ -96,6 +101,8 @@ const runPatternDetection = async (
 const getMyPatterns = async (
     userId: mongoose.Types.ObjectId
 ): Promise<IUserPattern | null> => {
+    console.log("run getMyPatterns");
+    
     return patternsRepository.getPatternByUserId(userId);
 };
 

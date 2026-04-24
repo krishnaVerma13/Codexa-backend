@@ -16,6 +16,8 @@ const getTimeline = async (
   userId: mongoose.Types.ObjectId,
   groupBy: "week" | "month" = "month"
 ): Promise<ITimelinePeriod[] | ApiError> => {
+  console.log("run Timeline ");
+  
   const dateFormat = groupBy === "week" ? "%Y-W%V" : "%Y-%m";
 
   try {

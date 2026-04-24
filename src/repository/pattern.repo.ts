@@ -7,6 +7,8 @@ const upsertPattern = async (
   patterns: string[],
   basedOnCount: number
 ): Promise<IUserPattern | void> => {
+  console.log("DB call get pattern of user last 10");
+  
   const doc = await UserPattern.findOneAndUpdate(
     { userId },
     {
@@ -22,6 +24,8 @@ const upsertPattern = async (
 const getPatternByUserId = async (
   userId: mongoose.Types.ObjectId
 ): Promise<IUserPattern | null> => {
+  console.log(" DB call find pettern bu Id ");
+  
   return UserPattern.findOne({ userId }).lean<IUserPattern>();
 };
 

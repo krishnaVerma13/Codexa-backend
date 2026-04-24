@@ -69,7 +69,7 @@ export const analyzeWithGroq = async (
   const parsed = JSON.parse(raw) as Record<string, unknown>;
   const scores = parsed.scores as Record<string, unknown>;
   
-   console.log("GROQ RAW:", JSON.stringify(parsed, null, 2))
+  //  console.log("GROQ RAW:", JSON.stringify(parsed, null, 2))
   // console.log("parsed :",parsed);
   // console.log("parsed :",parsed.cleanCode);
   if (!scores) throw new ApiError(500, "Groq response missing scores.");

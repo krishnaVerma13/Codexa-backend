@@ -21,6 +21,8 @@ const getObjectId = (stringId: string): Types.ObjectId | ApiError => {
 // GET /api/recommendations/me
 export const getMyRecommendations = asyncHandler(
   async (req: Request, res: Response) => {
+    console.log("run getMyRecommendations ");
+    
    const userId = getObjectId(req.user ? req.user?.userId : "");
      if (userId instanceof ApiError) {
          res.status(400).json({ success: false, message: "Invalid UserId" });
@@ -39,6 +41,8 @@ export const getMyRecommendations = asyncHandler(
 // POST /api/recommendations/refresh
 export const refreshRecommendations = asyncHandler(
   async (req: Request, res: Response) => {
+    console.log("run  refreshRecommendations");
+    
      const userId = getObjectId(req.user ? req.user?.userId : "");
      if (userId instanceof ApiError) {
          res.status(400).json({ success: false, message: "Invalid UserId" });

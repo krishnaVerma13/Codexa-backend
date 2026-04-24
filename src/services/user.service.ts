@@ -129,7 +129,8 @@ export const userService = {
     async getUserData(userId: string): Promise<ApiResponce<TUser> | ApiError> {
         const userExist = await userRepo.findById(userId);
         // console.log("userExist : ",userExist);
-
+        console.log("run get user data ");
+        
         if (userExist.success == false) {
             return new ApiError(userExist.statusCode, userExist.message)
         }

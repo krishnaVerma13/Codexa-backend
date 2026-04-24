@@ -19,6 +19,8 @@ import { patternsService } from "./patterns.service.js";
 const runAIAnalysis = async (prompt: string): Promise<IGroqAnalysisResponse | ApiError> => {
 
     try {
+        console.log("Analysis call AI");
+        
         return await analyzeWithGroq(prompt);
 
     } catch (error) {
@@ -68,7 +70,8 @@ const analyzeFromEditor = async (
     userId: Types.ObjectId,
     body: IAnalyzeFromEditorBody
 ): Promise<IAnalysisDocument | ApiError> => {
-
+ console.log("run analyzeFromEditor ");
+ 
     const { code, language, fileName } = body;
 
     const StrCode = typeof (code) != 'string' ? JSON.stringify(code) : code;
@@ -81,7 +84,7 @@ const analyzeFromEditor = async (
     });
 
     const aiResult = await runAIAnalysis(prompt);
-    console.log("aiResult :", aiResult);
+    // console.log("aiResult :", aiResult);
     if (aiResult instanceof ApiError) {
         return aiResult
     } else {
@@ -110,6 +113,8 @@ const analyzeFromGithub = async (
     userId: Types.ObjectId,
     body: IAnalyzeFromGithubBody
 ): Promise<IAnalysisDocument | ApiError> => {
+    console.log("run analyzeFromGithub ");
+    
     const { code, language, repoName, fileName } = body;
     const StrCode = typeof (code) != 'string' ? JSON.stringify(code) : code;
 
@@ -156,6 +161,8 @@ const getAnalysesByUser = async (
     page: number,
     limit: number
 ): Promise<{ analyses: IAnalysisDocument[]; total: number; totalPages: number }> => {
+    console.log(" run getAnalysesByUser ");
+    
     const { analyses, total } = await analysisRepository.getAnalysesByUserId(userId, page, limit);
     return { analyses, total, totalPages: Math.ceil(total / limit) };
 };

@@ -16,8 +16,12 @@ const getObjectId = (stringId: string): Types.ObjectId | ApiError => {
     }
 };
 
+
+
 // GET /api/patterns/myPattern
 export const getMyPatterns = asyncHandler(async (req: Request, res: Response) => {
+        console.log("run getMyPatterns");
+
   const userId = getObjectId(req.user ? req.user?.userId : "");
      if (userId instanceof ApiError) {
          res.status(400).json({ success: false, message: "Invalid UserId" });
@@ -36,6 +40,8 @@ export const getMyPatterns = asyncHandler(async (req: Request, res: Response) =>
 });
 
 export const analysisMyPatterns = asyncHandler(async (req: Request, res: Response) => {
+    console.log("run analysisMyPatterns");
+    
   const userId = getObjectId(req.user ? req.user?.userId : "");
      if (userId instanceof ApiError) {
          res.status(400).json({ success: false, message: "Invalid UserId" });

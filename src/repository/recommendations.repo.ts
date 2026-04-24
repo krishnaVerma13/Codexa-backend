@@ -12,6 +12,8 @@ const upsertRecommendations = async (
     patternVersion: Date
 ): Promise<IUserRecommendation> => {
     try {
+        console.log(" DB Call create and update recommendation ");
+        
         const doc = await UserRecommendation.findOneAndUpdate(
             { userId },
             { recommendations, generatedAt: new Date(), patternVersion },
@@ -29,6 +31,8 @@ const getByUserId = async (
     userId: mongoose.Types.ObjectId
 ): Promise<IUserRecommendation | null> => {
     try {
+        console.log("DB call get recommendation by ID");
+        
         return await UserRecommendation.findOne({ userId }).lean<IUserRecommendation>();
     } catch (err) {
         console.error("DB error fetching recommendations:", err);

@@ -37,6 +37,7 @@ const generateWithAI = async (prompt: string): Promise<IRecommendationItem[]> =>
             try {
                 const Groq = (await import("groq-sdk")).default;
                 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
+                console.log("recommendation generater call AI");
                 
                 const res = await groq.chat.completions.create({
                     model: "llama-3.3-70b-versatile",
@@ -67,6 +68,7 @@ const generateRecommendations = async (
     userId: mongoose.Types.ObjectId
 ): Promise<IUserRecommendation | ApiError> => {
     // Get current patterns
+    console.log("run generateRecommendatio");
     
     const userPattern = await patternsRepository.getPatternByUserId(userId);
 
@@ -95,6 +97,9 @@ const generateRecommendations = async (
 const getMyRecommendations = async (
     userId: mongoose.Types.ObjectId
 ): Promise<ApiResponce<IUserRecommendation> | ApiError> => {
+
+    console.log("run getMyRecommendations");
+    
     const userPattern = await patternsRepository.getPatternByUserId(userId);
 
     // No patterns yet
@@ -140,6 +145,8 @@ const getMyRecommendations = async (
 const forceRefresh = async (
     userId: mongoose.Types.ObjectId
 ): Promise<ApiResponce<IUserRecommendation> | ApiError> => {
+    console.log("run foreRefresh ");
+    
     const userPattern = await patternsRepository.getPatternByUserId(userId);
 
     if (!userPattern || userPattern.patterns.length === 0) {
