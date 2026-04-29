@@ -36,7 +36,7 @@ export const githubLoginService = async (code: string): Promise<ApiResponce<stri
     {
       headers: { Authorization: `Bearer ${githubAccessToken}` },
     })
-  // console.log("user github data : ",githubUser);
+  console.log("user github data : ",githubUser);
 
 
   // 3. Fetch verified email separately
@@ -72,9 +72,12 @@ export const githubLoginService = async (code: string): Promise<ApiResponce<stri
           githubUsername: githubUser.login,
           githubAccessToken: githubAccessToken,
           authType: 'github',
+          userProfile: githubUser.avatar_url ,
         }
       })
-      // console.log("github token :", githubAccessToken);
+      console.log("github avatar_url :", githubUser.avatar_url);
+      console.log("user store :",user);
+      
       //   5. Issue your own JWT pair
       const token = await JwtToken.generateToken({ userId: user.data?._id! })
       // console.log("existing user new token  :", token);
@@ -90,7 +93,11 @@ export const githubLoginService = async (code: string): Promise<ApiResponce<stri
         githubUsername: githubUser.login,
         githubAccessToken: githubAccessToken,
         authType: 'github',
+        userProfile: githubUser.avatar_url ,
+
       })
+         console.log("github avatar_url :", githubUser.avatar_url);
+      console.log("user store :",user);
 
       //   5. Issue your own JWT pair
       const token = await JwtToken.generateToken({ userId: user.data?._id! })
@@ -106,7 +113,8 @@ export const githubLoginService = async (code: string): Promise<ApiResponce<stri
   if (user.success == true) {
     await userRepo.updateUser({
       filter: { _id: user.data?._id }, update: {
-        githubAccessToken: githubAccessToken
+        githubAccessToken: githubAccessToken,
+        userProfile: githubUser.avatar_url ,
       }
     })
 

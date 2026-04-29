@@ -11,6 +11,7 @@ export interface TUser {
     trialUsed: Number;
     trialLimit: Number;
     authType: string;
+    userProfile: string;
     emailOTP?: Number;
     createdAt: Date;
     updatedAt: Date;

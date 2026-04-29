@@ -52,6 +52,10 @@ const UserModal = new Schema<TUser>({
         type: String,
         enum: ["email" , "github"]
     },
+    userProfile:{
+        type: String,
+        default : ""
+    },
     emailOTP:{
         type: Number,
     }

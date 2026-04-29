@@ -10,7 +10,10 @@ import cors from "cors"
 import AnalysisRouter from "./router/analysis.routes.js";
 import PatternRoute from "./router/patterns.route.js"
 import RErouter from "./router/recommendations.route.js";
+import { testCloudinary } from "./config/cloudinary.js";
 
+
+testCloudinary()
 connectDB()
 const app = express();
 const PORT = process.env.PORT || 5000;

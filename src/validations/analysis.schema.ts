@@ -19,5 +19,5 @@ export const analysisHistorySchema = z.object({
 });
 
 export const timelineQuerySchema = z.object({
-  groupBy: z.enum(["week", "month"]).default("month"),
+  groupBy: z.enum(["week", "month" , "day"]).default("day"),
 });

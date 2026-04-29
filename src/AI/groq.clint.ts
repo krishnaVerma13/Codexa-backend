@@ -61,7 +61,8 @@ export const analyzeWithGroq = async (
     response_format: { type: "json_object" },
     temperature: 0.3,
   });
-
+  console.log("----------------raw ---------------------------------",response);
+  
   const raw = response.choices[0]?.message?.content;
 
   if (!raw) throw new ApiError(500, "Groq returned empty response.");

@@ -7,6 +7,7 @@ import { userRepo } from "../repository/user.repo.js"
 import bcrypt from "bcrypt"
 import { JwtToken } from "../config/Jwt.js"
 import { SendEmailVerifaction } from "./emailVerifaction.js"
+import { file } from "zod"
 
 export const userService = {
 
@@ -135,6 +136,48 @@ export const userService = {
             return new ApiError(userExist.statusCode, userExist.message)
         }
         return new ApiResponce(userExist.statusCode, userExist.message, userExist.data)
+
+    }, 
+
+    async updateUserData(userId: string , update: object): Promise<ApiResponce<TUser> | ApiError> {
+        const data = {
+            filter : {_id : userId},
+            update: update
+        }
+
+        // console.log("data :",data);
+        
+        const userExist = await userRepo.updateUser(data);
+        console.log("userExist : ",userExist);
+        console.log("run update user data ");
+        
+        if (userExist.success == false) {
+            return new ApiError(userExist.statusCode, userExist.message)
+        }
+        return new ApiResponce(userExist.statusCode, userExist.message, userExist.data)
+
+    },
+
+    async forgotPassword( email: string , pass : string): Promise<ApiResponce<TUser | null> | ApiError> {
+       
+        const hashpass = await bcrypt.hash(pass, 10);
+
+       
+        const data = {
+            filter : {email : email},
+            update: {password : hashpass}
+        }
+
+        // console.log("data :",data);
+        
+        const userExist = await userRepo.updateUser(data);
+        // console.log("userExist : ",userExist);
+        // console.log("run update user data ");
+        
+        if (userExist.success == false) {
+            return new ApiError(userExist.statusCode, userExist.message)
+        }
+        return new ApiResponce(userExist.statusCode, userExist.message , null )
 
     }
 

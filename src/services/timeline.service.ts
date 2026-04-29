@@ -14,11 +14,15 @@ export interface ITimelinePeriod {
 
 const getTimeline = async (
   userId: mongoose.Types.ObjectId,
-  groupBy: "week" | "month" = "month"
+  groupBy: "day" | "week" | "month" = "month"
 ): Promise<ITimelinePeriod[] | ApiError> => {
   console.log("run Timeline ");
   
-  const dateFormat = groupBy === "week" ? "%Y-W%V" : "%Y-%m";
+  const dateFormat = groupBy === "day"
+      ? "%Y-%m-%d"
+      : groupBy === "week"
+      ? "%Y-W%V"
+      : "%Y-%m";
 
   try {
     const result = await Analysis.aggregate([
