@@ -2,7 +2,7 @@
   "name": "codexa-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "server.ts",
+  "main": "dist/server.ts",
   "engines": {
     "node": "20.x"
   },
