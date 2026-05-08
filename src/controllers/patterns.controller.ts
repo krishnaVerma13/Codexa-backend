@@ -50,10 +50,10 @@ export const analysisMyPatterns = asyncHandler(async (req: Request, res: Respons
 
   const patterns = await patternsService.runPatternDetection(userId);
 
-  if (!patterns) {
+  if (patterns instanceof ApiError) {
      res.status(200).json({ success : false, message : "No patterns yet. Run at least 3 analyses first." });
   }else{
-      res.status(200).json({success : true, message : "Patterns fetched." ,data: patterns});
+      res.status(patterns.statusCode).json({success : true, message : patterns.message ,data: patterns.data});
     }
 
 

@@ -28,7 +28,7 @@ const getObjectId = (stringId: string): Types.ObjectId | ApiError => {
 
 // POST /api/analysis/editor
 export const analyzeFromEditor = asyncHandler(async (req: Request, res: Response) => {
-        console.log("run analyzeFromEditor");
+    console.log("run analyzeFromEditor");
 
     const userId = getObjectId(req.user ? req.user?.userId : "");
     if (userId instanceof ApiError) {
@@ -38,14 +38,15 @@ export const analyzeFromEditor = asyncHandler(async (req: Request, res: Response
 
     const body = analyzeFromEditorSchema.parse(req.body);
     // console.log("call analyze from Editor body :",req.body);
-    
-    const analysis = await analysisService.analyzeFromEditor(userId, { ...body, fileName: body.fileName ?? undefined });
 
+    const analysis = await analysisService.analyzeFromEditor(userId, { ...body, fileName: body.fileName ?? undefined });
+    console.log("analysis :",analysis);
+    
     if (analysis instanceof ApiError) {
-        res.status(analysis.statusCode).json({success: false , message : analysis.message , error : analysis.errors})
+        res.status(analysis.statusCode).json({ success: false, message: analysis.message, error: analysis.errors })
     }
 
-    res.status(201).json({ success: true, message: "Code analyzed successfully.", data: analysis });
+    res.status(201).json({ success: true, message: analysis.message, data: analysis.data  });
     return
 });
 
@@ -66,17 +67,17 @@ export const analyzeFromGithub = asyncHandler(async (req: Request, res: Response
 
     const analysis = await analysisService.analyzeFromGithub(userId, body);
 
-    res.status(201).json({ success: true, message: "GitHub file analyzed successfully.", data: analysis });
+    res.status(201).json({ success: true, message: "GitHub file analyzed successfully.", data: analysis.data });
 });
 
 
 
 // GET /api/analysis/history
 export const getAnalysesByUser = asyncHandler(async (req: Request, res: Response) => {
-        console.log("run getAnalysesByUser ");
+    console.log("run getAnalysesByUser ");
 
     const userId = getObjectId(req.user ? req.user?.userId : "");
-    
+
     if (userId instanceof ApiError) {
         res.status(400).json({ success: false, message: "Invalid UserId" });
         return
@@ -98,7 +99,7 @@ export const getAnalysesByUser = asyncHandler(async (req: Request, res: Response
 
 // GET /api/analysis/:id
 export const getAnalysisById = asyncHandler(async (req: Request, res: Response) => {
-        console.log("run getAnalysisById ");
+    console.log("run getAnalysisById ");
 
     const userId = getObjectId(req.user ? req.user?.userId : "");
     if (userId instanceof ApiError) {
@@ -120,20 +121,20 @@ export const getAnalysisById = asyncHandler(async (req: Request, res: Response) 
 // GET /api/analysis/timeline
 export const getTimeline = asyncHandler(async (req: Request, res: Response) => {
     console.log("run getTimeline");
-    
- const userId = getObjectId(req.user ? req.user?.userId : "");
+
+    const userId = getObjectId(req.user ? req.user?.userId : "");
     if (userId instanceof ApiError) {
         res.status(400).json({ success: false, message: "Invalid UserId" });
         return
     }
-  const { groupBy } = timelineQuerySchema.parse(req.query);
+    const { groupBy } = timelineQuerySchema.parse(req.query);
 
-  const timeline = await timelineService.getTimeline(userId, groupBy);
+    const timeline = await timelineService.getTimeline(userId, groupBy);
 
-  if(timeline instanceof ApiError){
-      res.status(timeline.statusCode).json({success : false, message : "Timeline fetched fail."  });
+    if (timeline instanceof ApiError) {
+        res.status(timeline.statusCode).json({ success: false, message: "Timeline fetched fail." });
     }
 
 
-  res.status(200).json({success : true, message : "Timeline fetched." , data : timeline });
+    res.status(200).json({ success: true, message: "Timeline fetched.", data: timeline });
 });

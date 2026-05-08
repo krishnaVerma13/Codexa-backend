@@ -8,13 +8,15 @@ export interface TUser {
     githubUsername?: string;
     githubAccessToken?: string;
     isSubscribed: boolean;
-    trialUsed: Number;
-    trialLimit: Number;
+    tokenUsed: Number;
+    tokenLimit: Number;
+    isLimitRichied : Boolean;
     authType: string;
     userProfile: string;
     emailOTP?: Number;
     createdAt: Date;
     updatedAt: Date;
+    resetLimiteAt?: Date;
 }
 
 export interface UpdateUserSchema{

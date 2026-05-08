@@ -9,10 +9,12 @@ import {
     type IRecommendationItem,
 } from "../modules/UserRecommendation.model.js";
 import { ApiResponce } from "../utils/ApiResponce.js";
+import { callGroqAnalysis, CheckUserTokenLimite } from "../AI/groq.clint.js";
+import type { TUser } from "../Types.js";
 
 // ── AI call: Gemini → retry → Groq ───────────────────────────────────────────
 
-const generateWithAI = async (prompt: string): Promise<IRecommendationItem[]> => {
+const generateWithAI = async (prompt: string , userId : mongoose.Types.ObjectId): Promise<IRecommendationItem[]> => {
     
     // const tryGemini = async (): Promise<IRecommendationItem[]> => {
     //     // const model = getGeminiModel();
@@ -35,23 +37,13 @@ const generateWithAI = async (prompt: string): Promise<IRecommendationItem[]> =>
            
     // Groq fallback
             try {
-                const Groq = (await import("groq-sdk")).default;
-                const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
-                console.log("recommendation generater call AI");
+               
+                const raw = await callGroqAnalysis(userId , prompt)
+               
+                // console.log("recommendation raw :",raw , " type of :",typeof(raw));
                 
-                const res = await groq.chat.completions.create({
-                    model: "llama-3.3-70b-versatile",
-                    temperature: 0.3,
-                    response_format: { type: "json_object" },
-                    messages: [
-                        { role: "system", content: "Respond with valid JSON only. No markdown." },
-                        { role: "user", content: prompt },
-                    ],
-                });
-                const raw = res.choices[0]?.message?.content;
-
                 if (!raw) throw new ApiError(503, "Recommendations AI unavailable.");
-                const parsed = JSON.parse(raw) as { recommendations: IRecommendationItem[] };
+                const parsed = JSON.parse(String(raw)) as { recommendations: IRecommendationItem[] };
                 if (!Array.isArray(parsed.recommendations)) throw new ApiError(503, "Bad AI shape.");
                 return parsed.recommendations;
             } catch {
@@ -66,9 +58,11 @@ const generateWithAI = async (prompt: string): Promise<IRecommendationItem[]> =>
 
 const generateRecommendations = async (
     userId: mongoose.Types.ObjectId
-): Promise<IUserRecommendation | ApiError> => {
+): Promise<ApiResponce< IUserRecommendation| void | null | TUser> | ApiError> => {
     // Get current patterns
     console.log("run generateRecommendatio");
+     const limit = await CheckUserTokenLimite(userId)
+    if(limit.success && limit.statusCode == 200){
     
     const userPattern = await patternsRepository.getPatternByUserId(userId);
 
@@ -80,13 +74,18 @@ const generateRecommendations = async (
     }
 
     const prompt = buildRecommendationsPrompt(userPattern.patterns);
-    const recommendations = await generateWithAI(prompt);
+   
+    const recommendations = await generateWithAI(prompt , userId);
 
-    return recommendationsRepository.upsertRecommendations(
+    const resp = await  recommendationsRepository.upsertRecommendations(
         userId,
         recommendations,
         userPattern.lastUpdatedAt
     );
+    return new ApiResponce(200 , "Recommendation Created" , resp)
+}else{
+    return limit
+}
 };
 
 
@@ -96,7 +95,7 @@ const generateRecommendations = async (
 
 const getMyRecommendations = async (
     userId: mongoose.Types.ObjectId
-): Promise<ApiResponce<IUserRecommendation> | ApiError> => {
+): Promise<ApiResponce<IUserRecommendation | TUser | null | void> | ApiError> => {
 
     console.log("run getMyRecommendations");
     
@@ -115,7 +114,7 @@ const getMyRecommendations = async (
         if(fresh instanceof ApiError){
             return fresh
         }
-        return new ApiResponce(200 , "Recommendations generated." , fresh )  
+        return fresh  
     }
 
     // Patterns updated since last generation → regenerate
@@ -126,7 +125,7 @@ const getMyRecommendations = async (
         if(refreshed instanceof ApiError){
             return refreshed
         }
-        return new ApiResponce(200 , "Recommendations refreshed based on new patterns." , refreshed )  
+        return  refreshed   
 
     }
 
@@ -144,7 +143,7 @@ const getMyRecommendations = async (
 
 const forceRefresh = async (
     userId: mongoose.Types.ObjectId
-): Promise<ApiResponce<IUserRecommendation> | ApiError> => {
+): Promise<ApiResponce<IUserRecommendation | TUser | null | void> | ApiError> => {
     console.log("run foreRefresh ");
     
     const userPattern = await patternsRepository.getPatternByUserId(userId);
@@ -157,7 +156,7 @@ const forceRefresh = async (
     if(data instanceof ApiError){
             return data
         }
-    return new ApiResponce(200 , "Recommendation Fetch " , data)
+    return  data
 };
 
 

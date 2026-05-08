@@ -8,6 +8,7 @@ import { success, ZodError } from "zod"
 import cloudinary from "../config/cloudinary.js"
 import { Readable } from "node:stream"
 import { userRepo } from "../repository/user.repo.js"
+import mongoose from "mongoose"
 
 
 
@@ -272,6 +273,103 @@ export const ForgotPassword = asyncHandler(async(req : Request , res : Response)
             });
         }
         const resp = await userService.forgotPassword(data.email , data.password)
+            res.status(resp.statusCode).json({ success: resp.success, message: resp.message });
+          
+           
+        } catch (error) {
+            if (error instanceof ZodError) {
+                const err = error.issues.map((err) => ({
+                    field: err.path.join("."),
+                    message: err.message
+                }));
+                res.status(400).json({
+                    success: false,
+                    message: "Updation failed",
+                    errors: err
+                });
+                return;
+            }
+        throw error;
+    }
+})
+
+
+export const ResetTokenLimite = asyncHandler(async(req : Request , res : Response)=>{
+    try {
+        console.log("CAll Resert token limite ");
+        
+        const userID =  req.user?.userId;
+        const objectId = new mongoose.Types.ObjectId(userID);
+
+        const resp = await userService.resetTokenLimite(objectId)
+            res.status(resp.statusCode).json({ success: resp.success, message: resp.message });
+          
+           
+        } catch (error) {
+            if (error instanceof ZodError) {
+                const err = error.issues.map((err) => ({
+                    field: err.path.join("."),
+                    message: err.message
+                }));
+                res.status(400).json({
+                    success: false,
+                    message: "Updation failed",
+                    errors: err
+                });
+                return;
+            }
+        throw error;
+    }
+})
+
+export const SetTokenLimite = asyncHandler(async(req : Request , res : Response)=>{
+    try {
+        console.log("CAll Sert token limite ");
+        
+        const userID =  req.user?.userId;
+        const tokenLimite = Number(req.params?.tokenLimit);
+        console.log(req.params.tokenLimit);
+        
+        const objectId = new mongoose.Types.ObjectId(userID);
+
+        if(!tokenLimite){
+            res.status(400).json({success : false , message : "token limite is missing "})
+            return
+        }
+
+        const resp = await userService.SetTokenLimite(objectId , tokenLimite)
+            res.status(resp.statusCode).json({ success: resp.success, message: resp.message });
+          
+           
+        } catch (error) {
+            if (error instanceof ZodError) {
+                const err = error.issues.map((err) => ({
+                    field: err.path.join("."),
+                    message: err.message
+                }));
+                res.status(400).json({
+                    success: false,
+                    message: "Updation failed",
+                    errors: err
+                });
+                return;
+            }
+        throw error;
+    }
+})
+
+export const SetSubscription = asyncHandler(async(req : Request , res : Response)=>{
+    try {
+        console.log("CAll Sert Subscription ");
+        
+        const userID =  req.user?.userId;
+        const isSubscribed = req.params.isSubscribed;
+        const objectId = new mongoose.Types.ObjectId(userID);
+        const value = isSubscribed === "true" ? true : false;
+        console.log(isSubscribed);
+        
+
+        const resp = await userService.SetSubscription(objectId , value )
             res.status(resp.statusCode).json({ success: resp.success, message: resp.message });
           
            

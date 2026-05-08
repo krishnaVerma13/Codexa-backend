@@ -1,6 +1,6 @@
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { getGeminiModel } from "../AI/gemini.clint.js";
-import { analyzeWithGroq, type IGroqAnalysisResponse } from "../AI/groq.clint.js";
+import { analyzeWithGroq, CheckUserTokenLimite, type IGroqAnalysisResponse } from "../AI/groq.clint.js";
 import { buildCodeAnalysisPrompt } from "../AI/prompts/codeAnalysis.prompt.js";
 import { analysisRepository } from "../repository/analysis.repo.js";
 import { ApiError } from "../utils/ApiError.js";
@@ -12,17 +12,20 @@ import type {
     IAnalyzeFromGithubBody,
 } from "../analysis.Type.js";
 import { patternsService } from "./patterns.service.js";
+import { ApiResponce } from "../utils/ApiResponce.js";
+import type { TUser } from "../Types.js";
+
+
+
 
 // ── AI call with Gemini → Groq fallback ──────────────────────────────────────
 
 // const runAIAnalysis = async (prompt: string): Promise<IRawAIAnalysis | IGroqAnalysisResponse> => {
-const runAIAnalysis = async (prompt: string): Promise<IGroqAnalysisResponse | ApiError> => {
+const runAIAnalysis = async (prompt: string, userID: mongoose.Types.ObjectId): Promise<IGroqAnalysisResponse | ApiError> => {
 
     try {
         console.log("Analysis call AI");
-        
-        return await analyzeWithGroq(prompt);
-
+        return await analyzeWithGroq(prompt, userID);
     } catch (error) {
         console.log("error :", error);
         return new ApiError(500, "Groq server error", [String(error)])
@@ -69,9 +72,9 @@ const runAIAnalysis = async (prompt: string): Promise<IGroqAnalysisResponse | Ap
 const analyzeFromEditor = async (
     userId: Types.ObjectId,
     body: IAnalyzeFromEditorBody
-): Promise<IAnalysisDocument | ApiError> => {
- console.log("run analyzeFromEditor ");
- 
+): Promise<ApiError | ApiResponce<IAnalysisDocument | TUser | null>> => {
+    console.log("run analyzeFromEditor ");
+
     const { code, language, fileName } = body;
 
     const StrCode = typeof (code) != 'string' ? JSON.stringify(code) : code;
@@ -82,28 +85,35 @@ const analyzeFromEditor = async (
         sourceType: "editor",
         fileName,
     });
+    const limitCheck = await CheckUserTokenLimite(userId)
+    console.log("------------ limit check ========= ");
+    
+    if (limitCheck.success == true && limitCheck.statusCode == 200) {
 
-    const aiResult = await runAIAnalysis(prompt);
-    // console.log("aiResult :", aiResult);
-    if (aiResult instanceof ApiError) {
-        return aiResult
+        const aiResult = await runAIAnalysis(prompt, userId);
+        // console.log("aiResult :", aiResult);
+        if (aiResult instanceof ApiError) {
+            return aiResult
+        } else {
+            const save = await analysisRepository.createAnalysis({
+                userId,
+                language,
+                sourceType: "editor",
+                fileName,
+                codeSnapshot: code,
+                scores: aiResult.scores,
+                overallScore: aiResult.overallScore,
+                suggestions: aiResult.suggestions,
+            });
+
+            // ── Phase 2 hook — fire and forget, never block response ──
+            patternsService.runPatternDetection(userId).catch((err) =>
+                console.error("Pattern detection failed silently:", err)
+            );
+            return new ApiResponce(200, "Aanlysis Created", save);
+        }
     } else {
-        const save = await analysisRepository.createAnalysis({
-            userId,
-            language,
-            sourceType: "editor",
-            fileName,
-            codeSnapshot: code,
-            scores: aiResult.scores,
-            overallScore: aiResult.overallScore,
-            suggestions: aiResult.suggestions,
-        });
-
-        // ── Phase 2 hook — fire and forget, never block response ──
-        patternsService.runPatternDetection(userId).catch((err) =>
-            console.error("Pattern detection failed silently:", err)
-        );
-        return save;
+        return limitCheck
     }
 };
 
@@ -112,9 +122,9 @@ const analyzeFromEditor = async (
 const analyzeFromGithub = async (
     userId: Types.ObjectId,
     body: IAnalyzeFromGithubBody
-): Promise<IAnalysisDocument | ApiError> => {
+):  Promise<ApiError | ApiResponce<IAnalysisDocument | TUser | null>> => {
     console.log("run analyzeFromGithub ");
-    
+
     const { code, language, repoName, fileName } = body;
     const StrCode = typeof (code) != 'string' ? JSON.stringify(code) : code;
 
@@ -125,28 +135,34 @@ const analyzeFromGithub = async (
         fileName,
     });
 
-    const aiResult = await runAIAnalysis(prompt);
-    if (aiResult instanceof ApiError) {
-        return aiResult
-    } else {
-        const save = await analysisRepository.createAnalysis({
-            userId,
-            language,
-            sourceType: "github",
-            fileName,
-            repoName,
-            codeSnapshot: code,
-            scores: aiResult.scores,
-            overallScore: aiResult.overallScore,
-            suggestions: aiResult.suggestions,
-        });
+    const limitCheck = await CheckUserTokenLimite(userId)
+    if (limitCheck.success == true && limitCheck.statusCode == 200) {
 
-        // ── Phase 2 hook — fire and forget, never block response ──
-        patternsService.runPatternDetection(userId).catch((err) =>
-            console.error("Pattern detection failed silently:", err)
-        );
-        return save;
-    };
+        const aiResult = await runAIAnalysis(prompt, userId);
+        if (aiResult instanceof ApiError) {
+            return aiResult
+        } else {
+            const save = await analysisRepository.createAnalysis({
+                userId,
+                language,
+                sourceType: "github",
+                fileName,
+                repoName,
+                codeSnapshot: code,
+                scores: aiResult.scores,
+                overallScore: aiResult.overallScore,
+                suggestions: aiResult.suggestions,
+            });
+
+            // ── Phase 2 hook — fire and forget, never block response ──
+            patternsService.runPatternDetection(userId).catch((err) =>
+                console.error("Pattern detection failed silently:", err)
+            );
+            return new ApiResponce(200, "Aanlysis Created", save);
+        };
+    } else {
+        return limitCheck
+    }
 };
 
 
@@ -162,7 +178,7 @@ const getAnalysesByUser = async (
     limit: number
 ): Promise<{ analyses: IAnalysisDocument[]; total: number; totalPages: number }> => {
     console.log(" run getAnalysesByUser ");
-    
+
     const { analyses, total } = await analysisRepository.getAnalysesByUserId(userId, page, limit);
     return { analyses, total, totalPages: Math.ceil(total / limit) };
 };

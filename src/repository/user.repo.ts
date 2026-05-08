@@ -1,3 +1,4 @@
+import type mongoose from "mongoose";
 import User from "../modules/UserModal.js";
 import type { TUser, UpdateUserSchema } from "../Types.js";
 import { ApiError } from "../utils/ApiError.js";
@@ -8,7 +9,7 @@ import { ApiResponce } from "../utils/ApiResponce.js";
 
 export const userRepo = {
    
-    async findById(id : string):Promise< ApiResponce<TUser> | ApiError> { 
+    async findById(id : string | mongoose.Types.ObjectId):Promise< ApiResponce<TUser> | ApiError> { 
         const userData = await User.findById(id);
         if(!userData){
             return new ApiError(400 , " User not found , Invalid credentials" )
@@ -37,9 +38,18 @@ export const userRepo = {
    
     async updateUser(data : UpdateUserSchema): Promise<ApiResponce<TUser> | ApiError>{
         console.log("updateuser call")
-        const userData = await User.findOneAndUpdate(data.filter , data.update , {new : true});
+        const userData = await User.findOneAndUpdate(data.filter , data.update , {returnDocument : "after"});
         if(userData){
             return new ApiResponce(200 , "User Updated" , userData) 
+        }
+        return new ApiError(500 , "DB error , user not Updated" )
+    } , 
+
+    async updateOneUser(data : UpdateUserSchema): Promise<ApiResponce<null> | ApiError>{
+        console.log("updateuser call")
+        const userData = await User.updateOne(data.filter , data.update );
+        if(userData){
+            return new ApiResponce(200 , "User Updated" ,null ) 
         }
         return new ApiError(500 , "DB error , user not Updated" )
     }

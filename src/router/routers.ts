@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { ForgotPassword, getCurrentUserData, loginUser, registerUser, resendOtp, UpadteUserDetail, uploadProfilePhoto, VerifyEmail, verifyOtp } from "../controllers/userController.js";
+import { ForgotPassword, getCurrentUserData, loginUser, registerUser, resendOtp, ResetTokenLimite, SetSubscription, SetTokenLimite, UpadteUserDetail, uploadProfilePhoto, VerifyEmail, verifyOtp } from "../controllers/userController.js";
 import { getAllPublicRepos, getFileContents,  getRepoFiles,  githubCallBack, githubRedirect } from "../controllers/githubController.js";
 import { AuthMiddleware } from "../middleware/authMiddleware.js";
 import { upload } from "../middleware/upload.middleware.js";
@@ -25,5 +25,9 @@ UserRouter.post("/github/public/repo/contents" , AuthMiddleware , getFileContent
 
 
 UserRouter.get("/getData" , AuthMiddleware , getCurrentUserData )
+
+UserRouter.get("/resetTokenLimite" , AuthMiddleware , ResetTokenLimite)
+UserRouter.get("/setTokenLimite/:tokenLimit" , AuthMiddleware , SetTokenLimite)
+UserRouter.get("/setSubscribed/:isSubscribed" , AuthMiddleware , SetSubscription )
 
 export default UserRouter;

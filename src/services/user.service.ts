@@ -8,6 +8,7 @@ import bcrypt from "bcrypt"
 import { JwtToken } from "../config/Jwt.js"
 import { SendEmailVerifaction } from "./emailVerifaction.js"
 import { file } from "zod"
+import type mongoose from "mongoose"
 
 export const userService = {
 
@@ -15,7 +16,7 @@ export const userService = {
     async emailRegister(data: EmailRegistrationSchemaType): Promise<ApiResponce<TUser | null> | ApiError> {
 
         const userExist = await userRepo.findone({ email: data.email });
-        console.log("userExist : ", userExist);
+        // console.log("userExist : ", userExist);
 
         if (userExist.statusCode == 200) {
             return new ApiError(409, "Email allready existed ")
@@ -139,7 +140,7 @@ export const userService = {
 
     }, 
 
-    async updateUserData(userId: string , update: object): Promise<ApiResponce<TUser> | ApiError> {
+    async updateUserData(userId: string | mongoose.Types.ObjectId , update: object): Promise<ApiResponce<TUser> | ApiError> {
         const data = {
             filter : {_id : userId},
             update: update
@@ -148,7 +149,7 @@ export const userService = {
         // console.log("data :",data);
         
         const userExist = await userRepo.updateUser(data);
-        console.log("userExist : ",userExist);
+        // console.log("userExist : ",userExist);
         console.log("run update user data ");
         
         if (userExist.success == false) {
@@ -177,7 +178,61 @@ export const userService = {
         if (userExist.success == false) {
             return new ApiError(userExist.statusCode, userExist.message)
         }
-        return new ApiResponce(userExist.statusCode, userExist.message , null )
+        return new ApiResponce(userExist.statusCode, "Password Updated Successfuly" , null )
+
+    } ,
+
+    async resetTokenLimite( userId : mongoose.Types.ObjectId): Promise<ApiResponce<null> | ApiError> {
+       
+        const data = {
+            filter : {_id : userId},
+            update: {tokenUsed : 0}
+        }
+        
+        const userExist = await userRepo.updateUser(data);
+        // console.log("userExist : ",userExist);
+        // console.log("run update user data ");
+        
+        if (userExist.success == false) {
+            return new ApiError(userExist.statusCode, userExist.message)
+        }
+        return new ApiResponce(userExist.statusCode,  " Reset token limite successfuly " , null )
+
+    } ,
+
+    async SetTokenLimite( userId : mongoose.Types.ObjectId , tokenLimite : number): Promise<ApiResponce<null> | ApiError> {
+       
+        const data = {
+            filter : {_id : userId},
+            update: {tokenLimit : tokenLimite}
+        }
+        
+        const userExist = await userRepo.updateUser(data);
+        // console.log("userExist : ",userExist);
+        // console.log("run update user data ");
+        
+        if (userExist.success == false) {
+            return new ApiError(userExist.statusCode, userExist.message )
+        }
+        return new ApiResponce(userExist.statusCode, "Token Limited set successfuly " , null )
+
+    } ,
+
+    async SetSubscription( userId : mongoose.Types.ObjectId , isSubscribed : boolean): Promise<ApiResponce<null> | ApiError> {
+       
+        const data = {
+            filter : {_id : userId},
+            update: {isSubscribed : isSubscribed}
+        }
+        
+        const userExist = await userRepo.updateUser(data);
+        // console.log("userExist : ",userExist);
+        // console.log("run update user data ");
+        
+        if (userExist.success == false) {
+            return new ApiError(userExist.statusCode, userExist.message )
+        }
+        return new ApiResponce(userExist.statusCode, "Set Subscription State successfuly" , null )
 
     }
 
@@ -185,3 +240,5 @@ export const userService = {
 
 
 }
+
+

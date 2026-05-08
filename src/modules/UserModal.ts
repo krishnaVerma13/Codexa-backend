@@ -1,6 +1,7 @@
 import mongoose ,{Document , Schema}from "mongoose";
 import type{ TUser } from "../Types.js";
 import e from "express";
+import { boolean } from "zod";
 
 
 const UserModal = new Schema<TUser>({
@@ -40,13 +41,13 @@ const UserModal = new Schema<TUser>({
         type: Boolean,
         default: false
     },
-    trialUsed: {
+    tokenUsed: {
         type: Number,
         default: 0
     },
-    trialLimit: {
+    tokenLimit: {
         type: Number,
-        default: 10
+        default: 10000
     },
     authType:{
         type: String,
@@ -54,6 +55,14 @@ const UserModal = new Schema<TUser>({
     },
     userProfile:{
         type: String,
+        default : ""
+    },
+    isLimitRichied:{
+        type: Boolean,
+        default : false
+    },
+    resetLimiteAt:{
+        type: Date,
         default : ""
     },
     emailOTP:{

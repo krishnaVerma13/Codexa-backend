@@ -11,6 +11,7 @@ import AnalysisRouter from "./router/analysis.routes.js";
 import PatternRoute from "./router/patterns.route.js"
 import RErouter from "./router/recommendations.route.js";
 import { testCloudinary } from "./config/cloudinary.js";
+import { recoverPendingResets } from "./AI/TimeLimit.js";
 
 
 testCloudinary()
@@ -19,6 +20,10 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 app.use(cookieParser())
 app.use(express.json());
+
+//reset token limite of users
+recoverPendingResets().catch(console.error)
+
 app.use(cors({
     origin: "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE"],
