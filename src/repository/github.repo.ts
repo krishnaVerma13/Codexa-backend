@@ -11,7 +11,9 @@ export const githubRepo = {
     async getAllPublicRepos(userName: string): Promise<ApiResponce<any> | ApiError> {
         try {
             const url = `${GITHUB_API}/users/${userName}/repos`
+            console.log("before repo call url for git repos")
             const response = await axios.get(url)
+            console.log("after repo call url for git repos Responce : ", response)
             return new ApiResponce(200, "Public repositories fetched successfully", response.data)
         } catch (error) {
             return new ApiError(500, "Failed to fetch public repositories", [error instanceof Error ? error.message : "Unknown error"])
