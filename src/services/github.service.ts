@@ -138,7 +138,8 @@ export const githubService = {
       return new ApiError(400, "userName query parameter is required")
     }
     const resp = await githubRepo.getAllPublicRepos(userName)
-
+    console.log("repositories Responce in servicess : ",  resp);
+    
     // console.log("github responce : ", resp);
     if (resp.success == true) {
 

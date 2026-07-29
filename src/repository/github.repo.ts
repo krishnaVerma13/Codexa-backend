@@ -16,6 +16,8 @@ export const githubRepo = {
             console.log("after repo call url for git repos Responce : ", response)
             return new ApiResponce(200, "Public repositories fetched successfully", response.data)
         } catch (error) {
+            console.log("repositories error : ",error);
+            
             return new ApiError(500, "Failed to fetch public repositories", [error instanceof Error ? error.message : "Unknown error"])
         }
 
