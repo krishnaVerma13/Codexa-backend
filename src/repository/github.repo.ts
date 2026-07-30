@@ -35,7 +35,13 @@ export const githubRepo = {
         try {
             const url = `${GITHUB_API}/repos/${full_name}/git/${type}/${sha}`
             log("url : ", url);
-            const response = await axios.get(url)
+            const response = await axios.get(url , {
+                headers: {
+                    Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+                    'User-Agent': 'Codexa-App',
+                    Accept: 'application/vnd.github+json',
+                },
+            })
             return new ApiResponce(200, "Public repositories fetched successfully", response.data)
         } catch (error) {
             // console.log("error :",error);   
@@ -53,7 +59,13 @@ export const githubRepo = {
             const url = `${GITHUB_API}/repos/${full_name}/contents/${path ? path : ""}`
             log("url : ", url);
             // console.log("file content responce : ");
-            const response = await axios.get(url)
+            const response = await axios.get(url , {
+                headers: {
+                    Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+                    'User-Agent': 'Codexa-App',
+                    Accept: 'application/vnd.github+json',
+                },
+            })
 
 
             //   if(response.status === 200){
