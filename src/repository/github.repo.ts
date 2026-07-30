@@ -12,12 +12,18 @@ export const githubRepo = {
         try {
             const url = `${GITHUB_API}/users/${userName}/repos`
             console.log("before repo call url for git repos")
-            const response = await axios.get(url)
+            const response = await axios.get(url, {
+                headers: {
+                    Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+                    'User-Agent': 'Codexa-App',
+                    Accept: 'application/vnd.github+json',
+                },
+            })
             console.log("after repo call url for git repos Responce : ", response)
             return new ApiResponce(200, "Public repositories fetched successfully", response.data)
         } catch (error) {
-            console.log("repositories error : ",error);
-            
+            // console.log("repositories error : ",error);
+
             return new ApiError(500, "Failed to fetch public repositories", [error instanceof Error ? error.message : "Unknown error"])
         }
 
@@ -33,7 +39,7 @@ export const githubRepo = {
             return new ApiResponce(200, "Public repositories fetched successfully", response.data)
         } catch (error) {
             // console.log("error :",error);   
-            
+
             if (axios.isAxiosError(error)) {
                 return new ApiError(error?.response?.status || 500, error?.response?.data?.message || "Failed to fetch public repositories", [error instanceof Error ? error.message : "Unknown error"])
             }
@@ -49,7 +55,7 @@ export const githubRepo = {
             // console.log("file content responce : ");
             const response = await axios.get(url)
 
-            
+
             //   if(response.status === 200){
             return new ApiResponce(200, "Public repositories fetched successfully", response.data)
             // }

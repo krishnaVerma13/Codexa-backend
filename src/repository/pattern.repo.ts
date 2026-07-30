@@ -24,7 +24,7 @@ const upsertPattern = async (
 const getPatternByUserId = async (
   userId: mongoose.Types.ObjectId
 ): Promise<IUserPattern | null> => {
-  console.log(" DB call find pettern bu Id ");
+  console.log(" DB call find pettern by Id ");
   
   return UserPattern.findOne({ userId }).lean<IUserPattern>();
 };
